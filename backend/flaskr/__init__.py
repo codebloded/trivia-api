@@ -105,15 +105,16 @@ def create_app(test_config=None):
         Adds a question to database
         :return: The question that is added
         """
-        question = Question(
-            question=request.json['question'],
-            answer=request.json['answer'],
-            difficulty=request.json['difficulty'],
-            category=request.json['category']
-        )
-        question.insert()
+        question = request.get_json('question')
+        answer = request.get_json('answer')
+        category = request.get_json('category')
+        difficulty = request.get_json('difficulty')
+        if not (question and answer and category and difficulty):
+            return abort(400, 'Required question object keys missing from request body')
+        question_entry = Question(question, answer, category, difficulty)
+        question_entry.insert()
         return jsonify({
-            'question': question.format()
+            'question': question_entry.format()
         })
 
     '''
@@ -128,7 +129,7 @@ def create_app(test_config=None):
         Search for questions using the search term
         :return: Searched questions and total questions
         """
-        search_term = request.json['searchTerm']
+        search_term = request.get_json('searchTerm', '')
         questions = [question.format() for question in Question.query.all() if
                      re.search(search_term, question.question, re.IGNORECASE)]
         return jsonify({
@@ -149,9 +150,10 @@ def create_app(test_config=None):
         :param category_id: The category for which questions are to be filtered
         :return: Filtered questions, total questions and current category
         """
-        category = Category.query.get(category_id)
+        if not category_id:
+            return abort(400, 'No category id provided')
         questions = [question.format() for question in Question.query.all() if
-                     question.category == category.id]
+                     question.category == category_id]
         return jsonify({
             'questions': questions,
             'total_questions': len(questions),
@@ -170,15 +172,16 @@ def create_app(test_config=None):
         Gets question for quiz
         :return: Uniques quiz question or None
         """
-        previous_questions = request.json['previous_questions']
-        quiz_category = request.json['quiz_category']
-        all_questions = Question.query.all()
-        questions = [question.format() for question in all_questions if
-                     question.category == int(quiz_category['id']) or not quiz_category['id']]
+        previous_questions = request.get_json('previous_questions')
+        quiz_category = request.get_json('quiz_category')
+        if not (previous_questions and quiz_category):
+            return abort(400, 'Required keys missing from request body')
+        questions = [question.format() for question in Question.query.all() if
+                     question.category == int(quiz_category.get('id')) or not quiz_category.get('id')]
         if len(previous_questions) == len(questions):
-            return jsonify({})
+            return jsonify({}), 204
         question = random.choice(questions)
-        while any(question_id == question['id'] for question_id in previous_questions):
+        while any(question_id == question.get('id') for question_id in previous_questions):
             question = random.choice(questions)
         return jsonify({
             'question': question
