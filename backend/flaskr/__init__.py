@@ -105,10 +105,10 @@ def create_app(test_config=None):
         Adds a question to database
         :return: The question that is added
         """
-        question = request.get_json('question')
-        answer = request.get_json('answer')
-        category = request.get_json('category')
-        difficulty = request.get_json('difficulty')
+        question = request.json['question']
+        answer = request.json['answer']
+        category = request.json['category']
+        difficulty = request.json['difficulty']
         if not (question and answer and category and difficulty):
             return abort(400, 'Required question object keys missing from request body')
         question_entry = Question(question, answer, category, difficulty)
@@ -129,7 +129,7 @@ def create_app(test_config=None):
         Search for questions using the search term
         :return: Searched questions and total questions
         """
-        search_term = request.get_json('searchTerm', '')
+        search_term = request.json['searchTerm']
         questions = [question.format() for question in Question.query.all() if
                      re.search(search_term, question.question, re.IGNORECASE)]
         return jsonify({
@@ -172,14 +172,14 @@ def create_app(test_config=None):
         Gets question for quiz
         :return: Uniques quiz question or None
         """
-        previous_questions = request.get_json('previous_questions')
-        quiz_category = request.get_json('quiz_category')
-        if not (previous_questions and quiz_category):
+        previous_questions = request.json['previous_questions']
+        quiz_category = request.json['quiz_category']
+        if not quiz_category:
             return abort(400, 'Required keys missing from request body')
         questions = [question.format() for question in Question.query.all() if
                      question.category == int(quiz_category.get('id')) or not quiz_category.get('id')]
         if len(previous_questions) == len(questions):
-            return jsonify({}), 204
+            return jsonify({})
         question = random.choice(questions)
         while any(question_id == question.get('id') for question_id in previous_questions):
             question = random.choice(questions)
