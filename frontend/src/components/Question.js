@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import '../stylesheets/Question.css';
 
 class Question extends Component {
@@ -19,10 +19,10 @@ class Question extends Component {
       <div className="Question-holder">
         <div className="Question">{question}</div>
         <div className="Question-status">
-          <img className="category" src={`${category}.svg`}/>
+            <img alt={`${category} category icon`} className="category" src={`${category}.svg`}/>
           <div className="difficulty">Difficulty: {difficulty}</div>
-          <img src="delete.png" className="delete" onClick={() => this.props.questionAction('DELETE')}/>
-          
+            <img alt="Delete icon" src="delete.png" className="delete"
+                 onClick={() => this.props.questionAction('DELETE')}/>
         </div>
         <div className="show-answer button"
             onClick={() => this.flipVisibility()}>
