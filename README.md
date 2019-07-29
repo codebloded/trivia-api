@@ -1,44 +1,214 @@
-# Full Stack API Final Project
+# Trivia API
 
-## Full Stack Trivia
+Trivia is a Questions and Answers application
 
-Udacity is invested in creating bonding experiences for its employees and students. A bunch of team members got the idea to hold trivia on a regular basis and created a  webpage to manage the trivia app and play the game, but their API experience is limited and still needs to be built out. 
+## Getting Started
 
-That where you come in! Help them finish the trivia app so they can start holding trivia and seeing who's the most knowledgeable of the bunch. The application must:
+These instructions will get you a copy of the project up and running on your local machine for development and testing
+purposes.
 
-1) Display questions - both all questions and by category. Questions should show the question, category and difficulty rating by default and can show/hide the answer. 
-2) Delete questions.
-3) Add questions and require that they include question and answer text.
-4) Search for questions based on a text query string.
-5) Play the quiz game, randomizing either all questions or within a specific category. 
+### Prerequisites
 
-Completing this trivia app will give you the ability to structure plan, implement, and test an API - skills essential for enabling your future applications to communicate with others. 
+You need the following applications to run the server app:
+1. Python 3.7
+2. Pipenv (_Optional_)
 
-## Tasks
+You need the following applications to run the client app:
+1. Node 11+
+2. NPM
 
-There are `TODO` comments throughout project. Start by reading the READMEs in:
+### Installing
 
-1. [`./frontend/`](./frontend/README.md)
-2. [`./backend/`](./backend/README.md)
+It is preferred if you run this in a virtual environment for python. If you are using `pipenv`, virtual environment
+would be taken care of by `pipenv`. Instructions for setting up a virtual environment for your platform can be found in
+the [python docs](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/).
 
-We recommend following the instructions in those files in order. This order will look familiar from our prior work in the course.
+Installing the server dependencies:
+1. Change directory to `./backend`.
+2. Install the requirements:
+```bash
+pipenv install
+```
+or if you are not using `pipenv`:
+```bash
+pip install requirements.txt
+```
 
-## Starting and Submitting the Project
+Installing the client dependencies:
+1. Change directory to `./frontend`.
+2. Install the requirements:
+```bash
+npm i
+```
 
-[Fork](https://help.github.com/en/articles/fork-a-repo) the [project repository]() and [Clone](https://help.github.com/en/articles/cloning-a-repository) your forked repository to your machine. Work on the project locally and make sure to push all your changes to the remote repository before submitting the link to your repository in the Classroom. 
+## Testing
 
-## About the Stack
+To run the flask tests, run the following command:
+```bash
+python -m unittest backend.test.test_flaskr.TriviaTestCase
+```
 
-We started the full stack application for you. It is desiged with some key functional areas:
+## Running the application
 
-### Backend
+Starting the server:
+1. Change directory to `./backend`.
+2. Run the following commands:
+```bash
+export FLASK_APP=flaskr
+flask run
+```
+3. The backend application will be serve on **http://localhost:5000**
 
-The `./backend` directory contains a partially completed Flask and SQLAlchemy server. You will work primarily in app.py to define your endpoints and can reference models.py for DB and SQLAlchemy setup. 
+Starting the client:
+1. Change directory to `./frontend`.
+2. Run the following script:
+```bash
+npm run start
+```
+3. The frontend application will be serve on **http://localhost:3000**
 
-### Frontend
+Now, go to **http://localhost:3000** to view the Trivia app.
 
-The `./frontend` directory contains a complete React frontend to consume the data from the Flask server. You will need to update the endpoints after you define them in the backend. Those areas are marked with TODO and can be searched for expediency. 
 
-Pay special attention to what data the frontend is expecting from each API response to help guide how you format your API. 
+## API Documentation
+* GET "/categories"
+    - Request Parameters: None
+    - Response Body:
+    
+    `categories`: Dictionary of *Category ID* <-> *Category Type*
+```json
+{
+  "categories": {
+    "1": "Science",
+    "2": "Art"
+  } 
+}
+```
 
-[View the README.md within ./frontend for more details.](./frontend/README.md)
+* GET "/questions?page=1"
+    - Request Parameters: `page`: Page number
+    - Response Body:
+
+    `questions`: List of questions
+
+    `categories`: Dictionary of *Category ID* <-> *Category Type*
+
+    `total_questions`: Total number of  questions
+```json
+{
+  "questions": [{
+    "id": 1,
+    "question": "",
+    "answer": "",
+    "category": 1,
+    "difficulty": 1
+  }],
+  "categories": {
+    "1": "Science",
+    "2": "Art"
+  },
+  "total_questions": 1
+}
+```
+
+* DELETE "/questions/<int:question_id>"
+    - Request Parameters: `question_id`: Question ID to delete
+    - Response Body:
+
+    `deleted`: Question ID that is deleted
+```json
+{
+  "deleted": 20
+}
+```
+
+* POST "/questions"
+    - Request Body:
+    
+    `question`: Question statement
+    
+    `answer`: Answer statement
+    
+    `category`: Category ID
+    
+    `difficulty`: Difficulty Level
+    - Response Body:
+    
+    `question`: Question object that is created
+```json
+{
+  "question": {
+    "id": 1,
+    "question": "",
+    "answer": "",
+    "category": 1,
+    "difficulty": 1
+  }
+}
+```
+
+* POST "/search"
+    - Request Body:
+    
+    `searchTerm`: Search term
+    - Response Body:
+    
+    `questions`: List of questions found in search
+    
+    `total_questions`: Total number of  questions
+```json
+{
+  "questions": [{
+    "id": 1,
+    "question": "",
+    "answer": "",
+    "category": 1,
+    "difficulty": 1
+  }],
+  "total_questions": 1
+}
+```
+
+* GET "/categories/<int:category_id>/questions"
+    - Request Parameters: `category_id`: Category ID for questions
+    - Response Body:
+
+    `questions`: List of category questions
+
+    `total_questions`: Total number of  questions
+    
+    `current_category`: Current category ID
+```json
+{
+  "questions": [{
+    "id": 1,
+    "question": "",
+    "answer": "",
+    "category": 1,
+    "difficulty": 1
+  }],
+  "total_questions": 1,
+  "current_category": 1
+}
+```
+
+* POST "/quizzes"
+    - Request Body:
+    
+    `previous_questions`: List of previously answered questions
+
+    `quiz_category`: Category object of the quiz
+    - Response Body:
+    
+    `question`: Random question of requested category
+```json
+{
+  "question": {
+    "id": 1,
+    "question": "",
+    "answer": "",
+    "category": 1,
+    "difficulty": 1
+  }
+}
+```
