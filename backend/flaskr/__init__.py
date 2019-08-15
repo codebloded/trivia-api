@@ -1,11 +1,11 @@
 import random
 import re
 
-from flask import Flask, jsonify, request, abort
+from flask import abort, Flask, jsonify, request
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 
-from backend.database.models import setup_db, Category, Question
+from backend.database.models import Category, Question, setup_db
 
 QUESTIONS_PER_PAGE = 10
 
@@ -27,8 +27,10 @@ def create_app():
         :param response: HTTP Response
         :return: Modified HTTP Response
         """
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, true')
-        response.headers.add('Access-Control-Allow-Methods', 'GET, PATCH, POST, DELETE, OPTIONS')
+        response.headers.add('Access-Control-Allow-Headers',
+                             'Content-Type, Authorization, true')
+        response.headers.add('Access-Control-Allow-Methods',
+                             'GET, PATCH, POST, DELETE, OPTIONS')
         return response
 
     @app.route('/categories', methods=['GET'])
@@ -58,7 +60,8 @@ def create_app():
         upper_limit = page * 10
         lower_limit = upper_limit - 10
         return jsonify({
-            'questions': questions[lower_limit:upper_limit] if page else questions,
+            'questions': questions[
+                         lower_limit:upper_limit] if page else questions,
             'total_questions': len(questions),
             'categories': categories
         })
@@ -91,7 +94,9 @@ def create_app():
         category = request.json['category']
         difficulty = request.json['difficulty']
         if not (question and answer and category and difficulty):
-            return abort(400, 'Required question object keys missing from request body')
+            return abort(400,
+                         'Required question object keys missing from request '
+                         'body')
         question_entry = Question(question, answer, category, difficulty)
         question_entry.insert()
         return jsonify({
@@ -140,11 +145,14 @@ def create_app():
         if not quiz_category:
             return abort(400, 'Required keys missing from request body')
         questions = [question.format() for question in Question.query.all() if
-                     question.category == int(quiz_category.get('id')) or not quiz_category.get('id')]
+                     question.category == int(
+                         quiz_category.get('id')) or not quiz_category.get(
+                         'id')]
         if len(previous_questions) == len(questions):
             return jsonify({})
         question = random.choice(questions)
-        while any(question_id == question.get('id') for question_id in previous_questions):
+        while any(question_id == question.get('id') for question_id in
+                  previous_questions):
             question = random.choice(questions)
         return jsonify({
             'question': question

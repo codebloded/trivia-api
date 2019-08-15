@@ -15,7 +15,8 @@ class TriviaTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         self.database_name = 'trivia'
-        self.database_path = f'postgresql://localhost:5432/{self.database_name}'
+        self.database_path = \
+            f'postgresql://localhost:5432/{self.database_name}'
         setup_db(self.app, self.database_path)
 
         self.sample_question = {
@@ -31,7 +32,7 @@ class TriviaTestCase(unittest.TestCase):
             self.db.init_app(self.app)
 
             self.db.create_all()
-    
+
     def tearDown(self):
         """Executed after reach test"""
         pass
@@ -61,14 +62,17 @@ class TriviaTestCase(unittest.TestCase):
             self.assertEqual(data['deleted'], 1)
 
     def test_post_question(self):
-        res = self.client().post('/questions', data=json.dumps(self.sample_question), content_type='application/json')
+        res = self.client().post('/questions',
+                                 data=json.dumps(self.sample_question),
+                                 content_type='application/json')
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertIsNotNone(data['question'])
 
     def test_search(self):
         request_data = {'searchTerm': 'what'}
-        res = self.client().post('/search', data=json.dumps(request_data), content_type='application/json')
+        res = self.client().post('/search', data=json.dumps(request_data),
+                                 content_type='application/json')
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertIsInstance(data['questions'], list)
@@ -90,12 +94,14 @@ class TriviaTestCase(unittest.TestCase):
             'previous_questions': [1, 2, 3, 4],
             'quiz_category': {'id': 1, 'type': 'Science'}
         }
-        res = self.client().post('/quizzes', data=json.dumps(request_data), content_type='application/json')
+        res = self.client().post('/quizzes', data=json.dumps(request_data),
+                                 content_type='application/json')
         print(res.data)
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         if data['question']:
-            self.assertNotIn(data['question']['id'], request_data['previous_questions'])
+            self.assertNotIn(data['question']['id'],
+                             request_data['previous_questions'])
 
 
 # Make the tests conveniently executable
