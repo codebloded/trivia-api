@@ -1,9 +1,10 @@
-import random
+# import random
 import re
 
 from flask import abort, Flask, jsonify, request
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
+from sqlalchemy.sql.expression import func
 
 from backend.database.models import Category, Question, setup_db
 
@@ -126,8 +127,8 @@ def create_app():
         """
         if not category_id:
             return abort(400, 'No category id provided')
-        questions = [question.format() for question in Question.query.all() if
-                     question.category == category_id]
+        questions = [question.format() for question in
+                     Question.query.filter(Question.category == category_id)]
         return jsonify({
             'questions': questions,
             'total_questions': len(questions),
@@ -144,18 +145,16 @@ def create_app():
         quiz_category = request.json['quiz_category']
         if not quiz_category:
             return abort(400, 'Required keys missing from request body')
-        questions = [question.format() for question in Question.query.all() if
-                     question.category == int(
-                         quiz_category.get('id')) or not quiz_category.get(
-                         'id')]
-        if len(previous_questions) == len(questions):
+        category_id = int(quiz_category.get('id'))
+        questions = Question.query.filter(
+            Question.category == category_id,
+            ~Question.id.in_(previous_questions)) if category_id else \
+            Question.query.filter(~Question.id.in_(previous_questions))
+        question = questions.order_by(func.random()).first()
+        if not question:
             return jsonify({})
-        question = random.choice(questions)
-        while any(question_id == question.get('id') for question_id in
-                  previous_questions):
-            question = random.choice(questions)
         return jsonify({
-            'question': question
+            'question': question.format()
         })
 
     # Error Handler
