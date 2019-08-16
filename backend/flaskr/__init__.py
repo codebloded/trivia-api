@@ -74,8 +74,6 @@ def create_app():
         :param question_id: Id of the question to be deleted
         :return: Id of the question that has been deleted
         """
-        if not question_id:
-            return abort(400, 'No question id provided')
         question = Question.query.get(question_id)
         if not question:
             return abort(404, f'No question found with id: {question_id}')
@@ -90,10 +88,10 @@ def create_app():
         Adds a question to database
         :return: The question that is added
         """
-        question = request.json['question']
-        answer = request.json['answer']
-        category = request.json['category']
-        difficulty = request.json['difficulty']
+        question = request.json.get('question')
+        answer = request.json.get('answer')
+        category = request.json.get('category')
+        difficulty = request.json.get('difficulty')
         if not (question and answer and category and difficulty):
             return abort(400,
                          'Required question object keys missing from request '
@@ -110,7 +108,7 @@ def create_app():
         Search for questions using the search term
         :return: Searched questions and total questions
         """
-        search_term = request.json['searchTerm']
+        search_term = request.json.get('searchTerm', '')
         questions = [question.format() for question in Question.query.all() if
                      re.search(search_term, question.question, re.IGNORECASE)]
         return jsonify({
@@ -126,7 +124,7 @@ def create_app():
         :return: Filtered questions, total questions and current category
         """
         if not category_id:
-            return abort(400, 'No category id provided')
+            return abort(400, 'Invalid category id')
         questions = [question.format() for question in
                      Question.query.filter(Question.category == category_id)]
         return jsonify({
@@ -141,8 +139,8 @@ def create_app():
         Gets question for quiz
         :return: Uniques quiz question or None
         """
-        previous_questions = request.json['previous_questions']
-        quiz_category = request.json['quiz_category']
+        previous_questions = request.json.get('previous_questions')
+        quiz_category = request.json.get('quiz_category')
         if not quiz_category:
             return abort(400, 'Required keys missing from request body')
         category_id = int(quiz_category.get('id'))
