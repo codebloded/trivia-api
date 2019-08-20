@@ -119,7 +119,7 @@ class TriviaTestCase(unittest.TestCase):
                                  content_type='application/json')
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
-        if data['question']:
+        if data.get('question', None):
             self.assertNotIn(data['question']['id'],
                              request_data['previous_questions'])
 
